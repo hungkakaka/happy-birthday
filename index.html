@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday 🎂</title>
+
+<style>
+body{
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    text-align:center;
+    background: linear-gradient(135deg,#fbc2eb,#a6c1ee);
+    overflow:hidden;
+    position:relative;
+}
+
+/* ánh sáng mờ điện ảnh */
+body::before{
+    content:"";
+    position:fixed;
+    width:100%;
+    height:100%;
+    background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.6), transparent 60%);
+    pointer-events:none;
+}
+
+/* blur nhẹ */
+body::after{
+    content:"";
+    position:fixed;
+    width:100%;
+    height:100%;
+    backdrop-filter: blur(4px);
+    pointer-events:none;
+}
+
+.container{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+h1{
+    font-size:26px;
+    color:white;
+    font-weight:600;
+    letter-spacing:1px;
+    text-shadow:0 0 25px rgba(255,255,255,0.8);
+    margin-bottom:20px;
+}
+
+#typing{
+    font-size:18px;
+    color:white;
+    max-width:700px;
+    line-height:1.7;
+    text-shadow:0 0 20px rgba(255,255,255,0.8);
+    min-height:60px;
+}
+
+/* con trỏ */
+#typing::after{
+    content:"|";
+    animation: blink 1s infinite;
+}
+
+@keyframes blink{
+    50%{opacity:0;}
+}
+
+img{
+    width:85%;
+    max-width:330px;
+    border-radius:30px;
+    margin-top:30px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+    transition:0.6s ease;
+    filter: brightness(1.05);
+}
+
+img:hover{
+    transform:scale(1.05);
+}
+
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+    pointer-events:none;
+    z-index:1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🎉 Today is special with you 🎉</h1>
+    <h2 id="typing"></h2>
+    <img id="slideshow" src="photo2.jpg" alt="Birthday Photo">
+</div>
+
+<audio id="music" loop preload="auto">
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- tiếng gõ phím -->
+<audio id="typingSound" preload="auto">
+    <source src="typing.mp3" type="audio/mpeg">
+</audio>
+
+<canvas id="confetti"></canvas>
+
+<script>
+// ================= HEART FALL =================
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+let hearts = [];
+
+for(let i=0;i<50;i++){
+    hearts.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        size:Math.random()*20+15,
+        speed:Math.random()*2+1,
+        opacity:Math.random()*0.5+0.5
+    });
+}
+
+function drawHeart(x, y, size){
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x - size/2, y - size/2,
+                      x - size, y + size/3,
+                      x, y + size);
+    ctx.bezierCurveTo(x + size, y + size/3,
+                      x + size/2, y - size/2,
+                      x, y);
+    ctx.fill();
+}
+
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    for(let heart of hearts){
+        ctx.globalAlpha = heart.opacity;
+        ctx.shadowColor = "rgba(255,182,193,0.8)";
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = "rgba(255,105,180,0.7)";
+        drawHeart(heart.x, heart.y, heart.size);
+
+        heart.y += heart.speed;
+
+        if(heart.y > canvas.height){
+            heart.y = -20;
+            heart.x = Math.random()*canvas.width;
+        }
+    }
+
+    ctx.globalAlpha = 1;
+}
+
+setInterval(draw, 30);
+
+// ================= MUSIC =================
+const music = document.getElementById("music");
+
+function playMusic(){
+    music.volume = 0.3;
+    music.play().catch(()=>{});
+}
+
+document.addEventListener("click", playMusic, { once:true });
+document.addEventListener("touchstart", playMusic, { once:true });
+
+// ================= SLIDESHOW =================
+const images = ["photo2.jpg","photo3.jpg","photo4.jpg","photo5.jpg","photo6.jpg","photo6.jpg"];
+let index = 0;
+const slideshow = document.getElementById("slideshow");
+
+setInterval(()=>{
+    index = (index+1) % images.length;
+    slideshow.style.opacity = 0;
+
+    setTimeout(()=>{
+        slideshow.src = images[index];
+        slideshow.style.opacity = 1;
+    },600);
+
+},4000);
+
+// ================= TYPEWRITER =================
+const text = "Happy birthday with all my love. I hope in your new age you become the person you always want to be ❤️";
+const typingElement = document.getElementById("typing");
+const typingSound = document.getElementById("typingSound");
+
+let i = 0;
+
+function typeWriter(){
+    if(i < text.length){
+        typingElement.innerHTML += text.charAt(i);
+
+        // phát tiếng gõ
+        typingSound.currentTime = 0;
+        typingSound.play().catch(()=>{});
+
+        i++;
+        setTimeout(typeWriter, 140); // tốc độ chậm kiểu phim Hàn
+    }
+}
+
+typeWriter();
+</script>
+
+</body>
+</html>
